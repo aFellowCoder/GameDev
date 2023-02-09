@@ -1,0 +1,29 @@
+--Instructions: spawning machines cost energy
+
+function init(self)
+	msg.post("#sprite", "disable")
+end
+
+function on_message(self, message_id, message, sender)
+	if message_id == hash("showHighlight") then
+		msg.post("#sprite", "enable")
+
+	elseif MOVE == false then
+		msg.post("#sprite", "disable")
+
+	elseif message_id == hash("removeCollisionObject") then
+		msg.post("#collisionobject", "disable")
+
+	elseif message_id == hash("showCollisionObject") then
+		msg.post("#collisionobject", "enable")
+
+	elseif message_id == hash("trigger_response") and message.group == hash("machineMove") and message.own_group == hash("machinePosition") and MOVE == true  then
+		msg.post("#sprite", "enable")
+		msg.post("#collisionobject", "enable")
+		if message.enter == false then
+			msg.post("#sprite", "disable")
+		end
+
+end
+
+end

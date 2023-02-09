@@ -1,0 +1,180 @@
+
+--Instructions: spawning machines cost energy
+
+xPath = {10,20,30,40,50,60,70,80,90,100}
+yPath = {250,250,250,250,250,250,250,250,250,250}
+
+speed = 0.5
+
+destination = 1
+
+go.property("health", 200)
+go.property("alive", true)
+go.property("speed", 0.5)
+go.property("target", 0)
+--go.property("speed", 0.5)
+
+
+local function attackMachine(self)
+
+	if ISMACHINEALIVE(self, self.target) then
+		msg.post(self.target, "machineUnderAttack")
+
+		--LIST_OF_ACTIVE_ENEMIES[1] = 5
+	else
+		self.speed = 0.5
+		sprite.play_flipbook("enemySprite", hash("run"))
+		timer.cancel(self.timerHandle)
+	end
+	
+end
+
+
+
+function init(self)
+	
+	--msg.post(".", "acquire_input_focus")
+
+	--print(go.get_position().y)
+
+	table.insert(LIST_OF_ACTIVE_ENEMIES, go.get_id())
+
+	
+	self.enemyId = go.get_id()
+	
+	--self.deadSprite = msg.url("/enemySprite#sprite") -- URL of StrengthIndicatorBar
+	--self.labelHealthSprite = msg.url("/health#healthLabel")
+	--print(self.deadSprite)
+	--go.set(self.labelHealthSprite, "healthLabel", 5)
+	label.set_text("health", self.health)
+	--print(self.enemyId)
+	--go.set(self.enemyId, "/health#healthLabel", 5)
+
+	--math.randomseed(os.time())
+	
+	--msg.post(".", "acquire_input_focus")
+	
+	--self.speed = vmath.vector3(0,0,0)
+	--go.set_position(vmath.vector3(xPath[1], yPath[1], 0))
+end
+
+
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	local p = go.get_position()
+	p.x = p.x + self.speed
+	go.set_position(p)
+
+	--msg.post("#enemyCollisionObject", "disable")
+	--msg.post("#enemyCollisionObject", "enable")
+
+	
+	-- if self.health <= 0 then
+	-- 	--sprite.play_flipbook("enemySprite", hash("die"))
+	-- 	go.delete()
+	-- 	--print("Deleted")
+	-- 	REMOVEENEMYFROMLIST(self, go.get_id())
+	-- 	
+	-- end
+
+	-- enemy_position = go.get_position().x
+	-- if enemy_position >= 150 then
+	-- 	go.delete()
+	-- end
+
+	-- print(go.get_position().y)
+		
+
+--end
+end
+
+
+
+function on_message(self, message_id, message, sender)
+
+	if message_id == hash("trigger_response") and message.group == hash("bullet") then
+
+		if self.health <= 10 then
+			REMOVEENEMYFROMLIST(self, go.get_id())
+			self.health = self.health - 10
+			label.set_text("health", self.health)
+			sprite.play_flipbook("enemySprite", hash("die"))
+			self.alive = false
+			
+			self.speed = 0
+			enemyTimer = timer.delay(1.2, false, 
+			function() 
+				go.delete()
+			end )
+			
+
+		else
+			self.health = self.health - 10
+			label.set_text("health", self.health)
+
+			msg.post(message.other_id, "bulletDie")
+
+		end
+		
+		
+
+	elseif message_id == hash("trigger_response") and message.own_group == hash("enemyRange")  then
+	
+		self.speed = 0
+		sprite.play_flipbook("enemySprite", hash("attack"))
+
+		
+		if message.enter then
+			self.target = message.other_id
+			self.timerHandle = timer.delay(1, true, attackMachine)
+			--print("TARGET")
+			--print(self.target)
+
+		else
+			timer.cancel(self.timerHandle)
+			self.speed = 0.5
+			sprite.play_flipbook("enemySprite", hash("run"))
+			--print("Done")
+		end
+
+	elseif message_id == hash("trigger_response") and message.group == hash("end") then
+		print("Enemy despanwed")
+		go.delete()
+
+		
+
+		
+
+		
+	end
+	-- elseif message_id == hash("trigger_response") and message.group == hash("machine") then
+	-- 	self.speed = 0
+	-- 	sprite.play_flipbook("enemySprite", hash("attack"))
+	-- end
+end
+
+
+
+function on_input(self, action_id, action)
+	-- Add input-handling code here. The game object this script is attached to
+	-- must have acquired input focus:
+	--
+	--    msg.post(".", "acquire_input_focus")
+	--
+	-- All mapped input bindings will be received. Mouse and touch input will
+	-- be received regardless of where on the screen it happened.
+	-- Learn more: https://defold.com/manuals/input/
+	-- Remove this function if not needed
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end

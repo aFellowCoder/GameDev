@@ -1,0 +1,73 @@
+--Instructions: spawning machines cost energy
+MINUS = 0
+
+function init(self)
+	score = 200
+	goal = 50000
+	time = 300
+	label.set_text("/score1","Energy:" .. score)
+	label.set_text("/time1","Time: " .. time)
+	label.set_text("/goal1","Goal: " .. goal)
+
+
+	
+	timerHandleTime = timer.delay(1, true, update_Time)
+
+end
+
+function update_Time()
+
+	time = time - 1
+	label.set_text("/time1", "Time: " .. time)
+
+
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	if time == 0 then
+		label.set_text("/result1","Game Over")
+
+	elseif score >= goal then
+		label.set_text("/result1","Level Complete")
+
+	end
+	
+	
+end
+
+function on_message(self, message_id, message, sender)
+
+
+	if message_id == hash("scoreUpdate") then
+		
+		score = score + (20 * GLOBAL_NUM_OF_MACHINES) - MINUS
+		MINUS = 0
+		print(GLOBAL_NUM_OF_MACHINES)
+		label.set_text("/score1", "Energy: " .. score)
+	end
+	
+end
+
+function on_input(self, action_id, action)
+	-- Add input-handling code here. The game object this script is attached to
+	-- must have acquired input focus:
+	--
+	--    msg.post(".", "acquire_input_focus")
+	--
+	-- All mapped input bindings will be received. Mouse and touch input will
+	-- be received regardless of where on the screen it happened.
+	-- Learn more: https://defold.com/manuals/input/
+	-- Remove this function if not needed
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end

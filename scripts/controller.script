@@ -1,0 +1,241 @@
+
+--Instructions: spawning machines cost energy
+LIST_OF_ACTIVE_MACHINES = {}
+LIST_OF_ACTIVE_ENEMIES = {}
+GLOBAL_NUM_OF_MACHINES = 0
+
+
+function ISMACHINEALIVE(self, machine)
+	for index, value in ipairs(LIST_OF_ACTIVE_MACHINES) do
+		if value == machine then
+			return true
+		end
+	end
+	return false
+end
+
+function ISENEMYALIVE(self, enemy)
+	for index, value in ipairs(LIST_OF_ACTIVE_ENEMIES) do
+		if value == enemy then
+			return true
+		end
+	end
+	return false
+end
+
+function REMOVETURBINEFROMLIST(self, machine) 
+
+
+	for index, value in ipairs(LIST_OF_ACTIVE_MACHINES) do 
+
+		if hash(value) == hash(machine) then
+
+			--LIST_OF_ACTIVE_MACHINES[index] = nil
+			table.remove(LIST_OF_ACTIVE_MACHINES, index)
+	 	end
+	 end
+	--table.remove(LIST_OF_ACTIVE_MACHINES, 1)
+	i = 0
+end
+
+function REMOVEENEMYFROMLIST(self, enemy) 
+
+
+	for index, value in ipairs(LIST_OF_ACTIVE_ENEMIES) do 
+
+		if hash(value) == hash(enemy) then
+
+			--LIST_OF_ACTIVE_MACHINES[index] = nil
+			table.remove(LIST_OF_ACTIVE_ENEMIES, index)
+		end
+	end
+	--table.remove(LIST_OF_ACTIVE_MACHINES, 1)
+	i = 0
+end
+
+function updateScore(self, enemy) 
+
+	local count = 0
+	for _ in pairs(LIST_OF_ACTIVE_MACHINES) do 
+		count = count + 1
+	end
+	GLOBAL_NUM_OF_MACHINES = count
+		
+
+	msg.post("/score", "scoreUpdate")
+
+	
+end
+
+function spawnEnemy()
+	local yAxisLocations = {128.5, 181.5, 234.5, 287.5}
+	spawnLocation = math.random(1,4)
+	
+	local xAxis = -5
+	for index, value in ipairs(yAxisLocations) do
+		if index == spawnLocation then
+			YAxis = value
+		end
+	end
+	
+	local pos = vmath.vector3(xAxis, YAxis, 0.5)
+	collectionfactory.create("/createEnemy3#collectionfactory", pos, nil, {}, 1)
+
+end
+
+function spawnEnemy2()
+	local yAxisLocations = {128.5, 181.5, 234.5, 287.5}
+	spawnLocation = math.random(1,4)
+
+	local xAxis = -5
+	for index, value in ipairs(yAxisLocations) do
+		if index == spawnLocation then
+			YAxis = value
+		end
+	end
+
+	local pos = vmath.vector3(xAxis, YAxis, 0.5)
+	collectionfactory.create("/createEnemy2#collectionfactory", pos, nil, {}, 1)
+
+end
+
+function init(self)
+
+	local machinePositionY = {118.5, 171.5, 224.5, 277.5}
+
+	--msg.post(".", "acquire_input_focus")
+
+	self.timerHandle = timer.delay(5, true, updateScore)
+
+	self.timerHandle = timer.delay(4, true, spawnEnemy)
+
+	self.timerHandle = timer.delay(7, true, spawnEnemy2)
+
+	--local spawnLocations = {107, 161, 215, 268}
+	--YposY = spawnLocations[math.random(#spawnLocations)] -- for random spawning locations on y axis
+
+	
+	local XposX = 10
+	local YposY = 250
+	local pos = vmath.vector3(XposX, YposY, 0.5)
+
+	--collectionfactory.create("/createEnemy2#collectionfactory", pos, nil, {}, 1)
+
+
+
+	local XposX = 220
+	local YposY = 380
+	local pos = vmath.vector3(XposX, YposY, 0.5)
+
+	collectionfactory.create("/createWindTurbine2Collection#collectionfactory", pos, nil, {}, 1)
+
+	
+-- 	if TURBINE_RESPAWN == true then
+-- 		local XposX = 220
+-- 		local YposY = 380
+-- 		local pos = vmath.vector3(XposX, YposY, 0.5)
+-- 
+-- 		collectionfactory.create("/createWindTurbine2Collection#collectionfactory", pos, nil, {}, 1)
+-- 		TURBINE_RESPAWN = false
+-- 	end
+
+
+	local XposX = 320
+	local YposY = 360
+	local pos = vmath.vector3(XposX, YposY, 0.5)
+
+	collectionfactory.create("/createWatermillCollection#collectionfactory", pos, nil, {}, 1)
+
+	local XposX = 410
+	local YposY = 350
+	local pos = vmath.vector3(XposX, YposY, 0.5)
+
+	collectionfactory.create("/createSolarPanel3Collection#collectionfactory", pos, nil, {}, 1)
+
+
+
+
+	local machinePositionX = {44,130,216,302,388,474, 560, 646}
+	-- local machinePositionY = {118.5, 171.5, 224.5, 277.5}
+	-- local posMachine = vmath.vector3(machinePositionX[1], machinePositionY[1], 0.5)
+	-- local d1 = factory.create("/createMachinePosition#factory", posMachine, nil, {}, 1.0)
+
+	for i = 1, 4 do
+		for y = 1, 8 do
+			local posMachine = vmath.vector3(machinePositionX[y], machinePositionY[i], 0.5)
+			factory.create("/createMachinePosition#factory", posMachine, nil, {}, 1.0)
+			
+		end
+	end
+
+
+
+
+	
+
+
+	
+end
+
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+	if TURBINE_RESPAWN == true then
+		local XposX = 220
+		local YposY = 380
+		local pos = vmath.vector3(XposX, YposY, 0.5)
+
+		collectionfactory.create("/createWindTurbine2Collection#collectionfactory", pos, nil, {}, 1)
+		TURBINE_RESPAWN = false
+		MINUS = MINUS + 200
+	end
+
+	if SOLARPANEL_RESPAWN == true then
+		local XposX = 410
+		local YposY = 350
+		local pos = vmath.vector3(XposX, YposY, 0.5)
+
+		collectionfactory.create("/createSolarPanel3Collection#collectionfactory", pos, nil, {}, 1)
+		SOLARPANEL_RESPAWN = false
+		MINUS = MINUS + 200
+	end
+
+	if WATERMILL_RESPAWN == true then
+		local XposX = 320
+		local YposY = 360
+		local pos = vmath.vector3(XposX, YposY, 0.5)
+
+		collectionfactory.create("/createWatermillCollection#collectionfactory", pos, nil, {}, 1)
+		WATERMILL_RESPAWN = false
+		MINUS = MINUS + 200
+	end
+end
+
+function on_message(self, message_id, message, sender)
+	-- Add message-handling code here
+	-- Learn more: https://defold.com/manuals/message-passing/
+	-- Remove this function if not needed
+end
+
+function on_input(self, action_id, action)
+	-- Add input-handling code here. The game object this script is attached to
+	-- must have acquired input focus:
+	--
+	--    msg.post(".", "acquire_input_focus")
+	--
+	-- All mapped input bindings will be received. Mouse and touch input will
+	-- be received regardless of where on the screen it happened.
+	-- Learn more: https://defold.com/manuals/input/
+	-- Remove this function if not needed
+end
+
+function on_reload(self)
+	-- Add reload-handling code here
+	-- Learn more: https://defold.com/manuals/hot-reload/
+	-- Remove this function if not needed
+end

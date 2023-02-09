@@ -1,0 +1,176 @@
+--Instructions: spawning machines cost energy
+
+TOWER_MOVING = false
+
+TURBINE_INITIAL = false
+TURBINE_FINISHED = false
+
+TURBINE_RESPAWN = false
+
+go.property("health", 100)
+go.property("alive", true)
+go.property("dragged", false)
+go.property("placed", false)
+go.property("moveable", true)
+
+
+local function attackEnemy(self)
+
+	-- self.mousePosition = go.get_position()
+	-- self.mouse = nil
+	-- self.newLocation = go.get_position()
+
+	if ISENEMYALIVE(self, self.target) then
+		msg.post(self.target, "enemyUnderAttack")
+
+
+		local pos = go.get_position() + vmath.vector3(0, -30,0)
+		--local pos = go.get_position()
+		
+
+		factory.create("/createBullet#factory", pos, nil, {}, 1)
+
+		--LIST_OF_ACTIVE_ENEMIES[1] = 5
+	else
+		--self.speed = 0.5
+		--sprite.play_flipbook("enemySprite", hash("run"))
+		timer.cancel(self.timerHandle)
+	end
+
+end
+
+function init(self)
+
+	self.mousePosition = go.get_position()
+	self.mouse = nil
+	self.newLocation = go.get_position()
+	--msg.post(".", "acquire_input_focus")
+
+	table.insert(LIST_OF_ACTIVE_MACHINES, go.get_id())
+
+
+
+	
+	self.target = 0
+	self.machineId = go.get_id()
+	label.set_text("healthMachine", self.health)
+
+
+end
+
+function final(self)
+	-- Add finalization code here
+	-- Learn more: https://defold.com/manuals/script/
+	-- Remove this function if not needed
+end
+
+function update(self, dt)
+
+	if self.health <= 0 then
+		go.delete()
+		--print("Deleted")
+		REMOVETURBINEFROMLIST(self, go.get_id())
+		self.alive = false
+	end
+
+	if self.dragged == true and MOVE == true then
+		go.set_position(self.mousePosition)
+		self.placed = true
+		TOWER_MOVING = true
+	else
+		TOWER_MOVING = false
+		go.set_position(self.newLocation)
+		self.mousePosition = self.newLocation
+
+
+	end
+		
+end
+
+function on_message(self, message_id, message, sender)
+
+-- 	if message_id == hash("trigger_response") and message.group == hash("enemyRange") then
+-- 		print("Attacked")
+-- 		if self.health == 10 then
+-- 
+-- 			self.health = self.health - 10
+-- 			label.set_text("healthMachine", self.health)
+-- 			--sprite.play_flipbook("enemySprite", hash("die"))
+-- 			self.alive = false
+-- 
+-- 			enemyTimer = timer.delay(1.2, false, 
+-- 			function() 
+-- 				go.delete()
+-- 				REMOVETURBINEFROMLIST(self, go.get_id())
+-- 			end )
+-- 
+-- 
+-- 		else
+-- 			self.health = self.health - 10
+-- 			label.set_text("healthMachine", self.health)
+-- 		end
+-- 	end
+
+
+
+	if message_id == hash("machineUnderAttack") then
+		self.target = message.other_id
+		--print(go.get_position(self.target))
+		self.health = self.health - 10
+		--sprite.play_flipbook("enemySprite", hash("anim"))
+		label.set_text("healthMachine", self.health)
+	end
+	
+
+	if message_id == hash("trigger_response") and message.own_group == hash("machineFight")  then
+
+		if message.enter then
+			self.target = message.other_id
+			self.timerHandle = timer.delay(2, true, attackEnemy)
+			--print("TARGET")
+			--print(self.target)
+
+		else
+			timer.cancel(self.timerHandle)
+			--print("Done")
+		end
+
+	elseif message_id == hash("trigger_response") and message.group == hash("mouse") and message.own_group == hash("machineMove")  then
+		self.dragged = true
+		self.mousePosition = go.get_position(message.other_id)
+		self.mouse = message.other_id
+
+		-- if message.enter == false and MOVE == false then
+		-- 	print("Exit")
+		-- end
+
+	elseif message_id == hash("trigger_response") and message.group == hash("machinePosition") and message.own_group == hash("machineMove")  then
+
+		if message.enter == true and MOVE == true then
+			temp = go.get_position(message.other_id)
+			local pos = vmath.vector3(0, 50, 0)
+			self.newLocation = temp + pos
+		end
+		
+	elseif message_id == hash("trigger_response") and message.group == hash("spawn") and message.own_group == hash("machineSpawn") then
+
+
+		if message.enter == false then
+			TURBINE_RESPAWN = true
+			print("Turbine Spawned")
+		end
+		
+
+
+		
+
+
+end
+-- elseif message_id == hash("trigger_response") and message.group == hash("machine") then
+-- 	self.speed = 0
+-- 	sprite.play_flipbook("enemySprite", hash("attack"))
+-- end
+end
+
+
+
